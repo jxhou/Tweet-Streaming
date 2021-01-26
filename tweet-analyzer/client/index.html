@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Tweet Streaming</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <nav class="navbar navbar-dark bg-dark">
+      <div class="container">
+        <a href="#" class="navbar-brand">Real-Time Tweet Stream Statistics</a>
+      </div>
+    </nav>
+    <div class="container" id="tweetStream"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col">Total number of tweets received: </div>
+        <div class="col" id="totalTweets"></div>
+      </div>
+      <div class="row">
+        <div class="col">Average tweets per hour: </div>
+        <div class="col" id="avgTweetsPerHour"></div>
+      </div>
+      <div class="row">
+        <div class="col">Average tweets per minute: </div>
+        <div class="col" id="avgTweetsPerMin"></div>
+      </div>
+      <div class="row">
+        <div class="col">Average tweets per second: </div>
+        <div class="col" id="avgTweetsPerSec"></div>
+      </div>
+      <div class="row">
+        <div class="col">Top emojis in tweets: </div>
+        <div class="col" id="topEmojis"></div>
+      </div>
+      <div class="row">
+        <div class="col">Percent of tweets that contains emojis (%): </div>
+        <div class="col" id="emojisPercent"></div>
+      </div>
+      <div class="row">
+        <div class="col">Top hashtags : </div>
+        <div class="col" id="topHashTags">
+          <!--
+          <div class="row" id="topHashTags1">
+          </div>
+          <div class="row" id="topHashTags2">
+          </div>
+          <div class="row" id="topHashTags3">
+          </div>
+          -->
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">Percent of tweets that contain a url (%) : </div>
+        <div class="col" id="urlPercent"></div>
+      </div>
+      <div class="row">
+        <div class="col">Percent of tweets that contain a photo url (%) : </div>
+        <div class="col" id="photoPercent"></div>
+      </div>
+      <div class="row">
+        <div class="col">Top domains of urls in tweets : </div>
+        <div class="col" id="topDomains">
+          <!--
+          <div class="row" id="topDomains1"></div>
+          <div class="row" id="topDomains2"></div>
+          <div class="row" id="topDomains3"></div>
+          -->
+        </div>
+      </div>
+    </div>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.0/angular.min.js" async defer></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"
+      integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ=="
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      const tweetStream = document.getElementById('tweetStream')
+      const totalTweets = document.getElementById('totalTweets')
+      const avgTweetsPerHour = document.getElementById('avgTweetsPerHour')
+      const avgTweetsPerMin = document.getElementById('avgTweetsPerMin')
+      const avgTweetsPerSec = document.getElementById('avgTweetsPerSec')
+      const topEmojis = document.getElementById('topEmojis')
+      const emojisPercent = document.getElementById('emojisPercent')
+      const topHashTags = document.getElementById('topHashTags')
+      const urlPercent = document.getElementById('urlPercent')
+      const photoPercent = document.getElementById('photoPercent')
+      const topDomains = document.getElementById('topDomains')
+
+      const socket = io()
+      let stat = {}
+      socket.on('connect', () => {
+        console.log('Connected to server...')
+      })
+
+      socket.on('tweetStats', (tweet) => {
+        console.log(tweet)
+
+        // tweetStream.innerText = JSON.stringify(tweet)
+        totalTweets.innerText = tweet.totalTweets
+        avgTweetsPerHour.innerText = tweet.avgTwPerHr
+        avgTweetsPerMin.innerText = tweet.avgTwPerMin
+        avgTweetsPerSec.innerText = tweet.avgTwPerSec
+        topEmojis.innerText = tweet.topEmojis
+        emojisPercent.innerText = tweet.emojiPercent
+        urlPercent.innerText = tweet.urlPercent
+        photoPercent.innerText = tweet.photoUrlPercent
+
+        if (tweet.topHashTags) {
+          while (topHashTags.hasChildNodes()) {
+            topHashTags.removeChild(topHashTags.lastChild);
+          }
+          tweet.topHashTags.forEach(element => {
+            const hitem = document.createElement('div')
+            hitem.innerText = element
+            topHashTags.appendChild(hitem);
+          });
+        }
+
+        if (tweet.topDomains) {
+          while (topDomains.hasChildNodes()) {
+            topDomains.removeChild(topDomains.lastChild);
+          }
+          tweet.topDomains.forEach(element => {
+            const hitem = document.createElement('div')
+            hitem.innerText = element
+            topDomains.appendChild(hitem);
+          });
+        }
+      })
+    </script>
+  </body>
+</html>
