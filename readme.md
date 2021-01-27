@@ -1,8 +1,8 @@
 ## Run the app
 1. download the entire project.
 
-2. add your tw developer credential in:
-\tweet-streaming\tweet-feeder\.env
+2. Edit your tw developer credential in:
+/tweet-streaming/tweet-feeder/.env
 
 ```
   TWITTER_API_KEY = <your api-key>
@@ -11,6 +11,8 @@
   TWITTER_ACCESS_TOKEN_SECRET = <your access token secret>
   TWITTER_BEARER_TOKEN = <bear token, not needed >
 ```
+
+**Make sure to update .env before start the app**
 
 3. In a docker environment such as window wsl run following command
 ```
