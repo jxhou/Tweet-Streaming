@@ -1,7 +1,14 @@
-const emojiHandler = require('./emojiHandler');
-const hashTagHandler = require('./hashTagHandler');
-const urlHandler = require('./urlHandler');
-const mediaHandler = require('./mediaHandler');
+const EmojiHandler = require('./emojiHandler');
+const emojiHandler = new EmojiHandler();
+const HashTagHandler = require('./hashTagHandler');
+const hashTagHandler = new HashTagHandler();
+const UrlHandler = require('./urlHandler');
+const urlHandler = new UrlHandler;
+const MediaHandler = require('./mediaHandler');
+const mediaHandler = new MediaHandler();
+
+// Get a collection tweet handlers
+const handlers = [emojiHandler, hashTagHandler, urlHandler, mediaHandler];
 
 // support a client notification.
 let clientSocket = null
@@ -10,13 +17,17 @@ const notificationInterval = 1000; // every second
 
 let stat = {
   tweetCount: 0,
-  tweetCountWithEmoji: 0,
-  tweetCountWithUrl: 0,
   tweetCountWithPhotoUrl: 0,
   startTime: Date.now(),
-  topEmojis: [],
   topHashTags: [],
-  topDomains: []
+  urls: {
+    tweetCountWithUrl: 0,
+    topDomains: []
+  },
+  emojis: {
+    topEmojis: [], 
+    tweetCountWithEmoji: 0,
+  }
 };
 
 // Helper to build a current statistics for the tweets
@@ -30,11 +41,11 @@ function getStats() {
     avgTwPerHr: cntPerSec * 60 * 60,
     avgTwPerMin: cntPerSec * 60,
     avgTwPerSec: cntPerSec,
-    topEmojis: stat.topEmojis,
+    topEmojis: stat.emojis.topEmojis,
     topHashTags: stat.topHashTags,
-    topDomains: stat.topDomains,
-    emojiPercent: Math.floor(100 * stat.tweetCountWithEmoji / stat.tweetCount),
-    urlPercent: Math.floor(100 * stat.tweetCountWithUrl / stat.tweetCount),
+    topDomains: stat.urls.topDomains,
+    emojiPercent: Math.floor(100 * stat.emojis.tweetCountWithEmoji / stat.tweetCount),
+    urlPercent: Math.floor(100 * stat.urls.tweetCountWithUrl / stat.tweetCount),
     photoUrlPercent: Math.floor(100 * stat.tweetCountWithPhotoUrl / stat.tweetCount)
   };
 
@@ -65,30 +76,53 @@ function processTweet(tweet) {
   }
   stat.tweetCount += 1;
 
-  // handle emojis
-  const hasEmoji = emojiHandler.processEmojis(tweet.text);
-  if (hasEmoji) {
-    stat.tweetCountWithEmoji += 1;
-  }
+  // Let run through each tweet handler
+  handlers.forEach(handler => {
+    handler.process(tweet);
+    handler.outputStats(stat);
+  })
 
-  stat.topEmojis = emojiHandler.getTopEmoji();
+  // handle emojis
+  // const hasEmoji = emojiHandler.processEmojis(tweet.text);
+  // if (hasEmoji) {
+  //   stat.tweetCountWithEmoji += 1;
+  // }
+
+  // stat.topEmojis = emojiHandler.getTopEmoji();
+
+  // emojiHandler.process(tweet);
+  // emojiHandler.outputStats(stat);
 
   // handle hashtags
+  /*
   hashTagHandler.processHashTags(tweet.entities.hashtags);
   stat.topHashTags = hashTagHandler.getTopHashTags();
+  */
+  // hashTagHandler.process(tweet);
+  // hashTagHandler.outputStats(stat);
 
   // handle url domain
+  /*
   const urlCnt = urlHandler.processUrls(tweet.entities.urls);
   stat.topDomains = urlHandler.getTopDomains();
   if (urlCnt > 0) {
     stat.tweetCountWithUrl += 1;
-  }
+  }*/
+  // urlHandler.process(tweet);
+  // urlHandler.outputStats(stat);
+  
 
   // handle photo 
+  /*
   const photoCnt = mediaHandler.processPhotos(tweet.entities.media);
   if (photoCnt > 0) {
     stat.tweetCountWithPhotoUrl += 1;
-  }
+  }*/
+
+  // mediaHandler.process(tweet);
+  // mediaHandler.outputStats(stat);
+
+
 
   // send stats to client if needed.
   sendNotification();

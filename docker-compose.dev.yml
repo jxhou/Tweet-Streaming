@@ -1,0 +1,17 @@
+version: '3'
+volumes: 
+  modules:
+services:
+  redis:
+    image: 'redis:latest'
+    ports: 
+      - '6379:6379'
+  tweet-feeder:
+    build:
+      context: ./tweet-feeder
+    volumes:
+      - /app/node_modules
+      - ./tweet-feeder:/app
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
