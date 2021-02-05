@@ -47,3 +47,5 @@ Currently tweet-analyzer also serves as a limited restful api server and web ser
 ```
 docker-compose -f docker-compose.dev.yml up
 ```
+## Project Requirement
+https://github.com/asachdeva/take-home-exercise
